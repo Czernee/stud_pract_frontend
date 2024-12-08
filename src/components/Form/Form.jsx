@@ -6,7 +6,23 @@ const Form = () => {
     const [name, setName] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [pickUpPoint, setPickUpPoint] = useState('');
+    const [errors, setErrors] = useState({});
     const {tg} = useTelegram();
+
+    const validateFields = () => {
+        let tempErrors = {};
+        if (!name.trim()) {
+            tempErrors.name = "ФИО обязательно для заполнения";
+        }
+        if (!phoneNumber.match(/^\d{10}$/)) {
+            tempErrors.phoneNumber = "Номер телефона должен состоять из 10 цифр";
+        }
+        if (!pickUpPoint) {
+            tempErrors.pickUpPoint = "Выберите пункт выдачи";
+        }
+        setErrors(tempErrors);
+        return Object.keys(tempErrors).length === 0;
+    };
 
     const onSendData = useCallback(() => {
         const data = {
@@ -40,22 +56,27 @@ const Form = () => {
 
     const onChangeName = (e) => {
         setName(e.target.value)
+        if (errors.name) validateFields()
     }
 
     const onChangePhoneNumber = (e) => {
         setPhoneNumber(e.target.value)
+        if (errors.phoneNumber) validateFields()
     }
 
     const onChangePickUpPoint = (e) => {
         setPickUpPoint(e.target.value)
+        if (errors.pickUpPoint) validateFields()
     }
 
     return (
         <div className={'form'}>
             <h3>Введите ваше ФИО</h3>
-            <input className={'input'} type='text' placeholder={'Иванов Иван Иванович'} value={name} onChange={onChangeName} minLength={8} maxLength={40} required/>
+            <input className={'input'} type='text' placeholder={'Иванов Иван Иванович'} value={name} onChange={onChangeName} minLength={8} maxLength={40} required/> 
+            {errors.name && <span className="error">{errors.name}</span>}
             <h3>Введите номер телефона</h3>
             <input className={'input'} type='text' placeholder={'89886091234'} value={phoneNumber} onChange={onChangePhoneNumber} minLength={10} maxLength={11} required/>
+            {errors.phoneNumber && <span className="error">{errors.phoneNumber}</span>}
             <h3>Выберите пункт выдачи</h3>
             <select value={pickUpPoint} onChange={onChangePickUpPoint} className={'select'} required>
                 <option value={''}>Выберите пункт выдачи</option>
@@ -63,6 +84,7 @@ const Form = () => {
                 <option value={'Преградная'}>Преградная</option>
                 <option value={'Черкесск'}>Черкесск</option>
             </select>
+            {errors.pickUpPoint && <span className="error">{errors.pickUpPoint}</span>}
         </div>
     )
 }
